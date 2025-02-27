@@ -149,7 +149,8 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(min_mint_amount <= mint_amount, Error::<T>::AmountSlippage);
 
-		T::MultiCurrency::deposit(pool.lp_currency_id, to, mint_amount)?;
+		T::MultiCurrency::deposit(pool.lp_currency_id, to, mint_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		Self::deposit_event(Event::AddLiquidity {
 			pool_id,
@@ -276,8 +277,10 @@ impl<T: Config> Pallet<T> {
 			.and_then(|n| pool.balances[index as usize].checked_sub(n))
 			.ok_or(Error::<T>::Arithmetic)?;
 
-		T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)?;
-		T::MultiCurrency::transfer(pool.currency_ids[index as usize], &pool.account, to, dy)?;
+		T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
+		T::MultiCurrency::transfer(pool.currency_ids[index as usize], &pool.account, to, dy)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		Self::deposit_event(Event::RemoveLiquidityOneCurrency {
 			pool_id,
@@ -316,11 +319,13 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(burn_amount <= max_burn_amount, Error::<T>::AmountSlippage);
 
-		T::MultiCurrency::withdraw(pool.lp_currency_id, who, burn_amount)?;
+		T::MultiCurrency::withdraw(pool.lp_currency_id, who, burn_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		for (i, balance) in amounts.iter().enumerate() {
 			if *balance > Zero::zero() {
-				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *balance)?;
+				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *balance)
+					.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 			}
 		}
 

@@ -119,7 +119,8 @@ impl<T: Config> Pallet<T> {
 		}
 
 		ensure!(min_mint_amount <= mint_amount, Error::<T>::AmountSlippage);
-		T::MultiCurrency::deposit(meta_pool.info.lp_currency_id, to, mint_amount)?;
+		T::MultiCurrency::deposit(meta_pool.info.lp_currency_id, to, mint_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		Self::deposit_event(Event::AddLiquidity {
 			pool_id,
@@ -244,13 +245,14 @@ impl<T: Config> Pallet<T> {
 			.and_then(|n| meta_pool.info.balances[index as usize].checked_sub(n))
 			.ok_or(Error::<T>::Arithmetic)?;
 
-		T::MultiCurrency::withdraw(meta_pool.info.lp_currency_id, who, lp_amount)?;
+		T::MultiCurrency::withdraw(meta_pool.info.lp_currency_id, who, lp_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 		T::MultiCurrency::transfer(
 			meta_pool.info.currency_ids[index as usize],
 			&meta_pool.info.account,
 			to,
 			dy,
-		)?;
+		).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		Self::deposit_event(Event::RemoveLiquidityOneCurrency {
 			pool_id,
@@ -297,7 +299,8 @@ impl<T: Config> Pallet<T> {
 		burn_amount = burn_amount.checked_add(One::one()).ok_or(Error::<T>::Arithmetic)?;
 
 		ensure!(burn_amount <= max_burn_amount, Error::<T>::AmountSlippage);
-		T::MultiCurrency::withdraw(meta_pool.info.lp_currency_id, who, burn_amount)?;
+		T::MultiCurrency::withdraw(meta_pool.info.lp_currency_id, who, burn_amount)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		for (i, balance) in amounts.iter().enumerate() {
 			if *balance > Zero::zero() {
@@ -306,7 +309,7 @@ impl<T: Config> Pallet<T> {
 					&meta_pool.info.account,
 					to,
 					*balance,
-				)?;
+				).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 			}
 		}
 
@@ -493,7 +496,8 @@ impl<T: Config> Pallet<T> {
 				.ok_or(Error::<T>::Arithmetic)?;
 		}
 
-		T::MultiCurrency::transfer(currency_to, &meta_pool.info.account, to, dy)?;
+		T::MultiCurrency::transfer(currency_to, &meta_pool.info.account, to, dy)
+			.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 		Self::deposit_event(Event::CurrencyExchangeUnderlying {
 			pool_id,

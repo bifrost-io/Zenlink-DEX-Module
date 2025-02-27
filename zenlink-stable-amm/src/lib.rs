@@ -288,6 +288,8 @@ pub mod pallet {
 		InvalidBasePoolLpCurrency,
 		/// The token index out of range.
 		TokenIndexOutOfRange,
+		/// Invalid MultiCurrency operation.
+		InvalidCurrencyOperation,
 	}
 
 	#[pallet::call]
@@ -1089,7 +1091,7 @@ pub mod pallet {
 							&pool.account,
 							&pool.admin_fee_receiver,
 							balance,
-						)?;
+						).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 					}
 					Self::deposit_event(Event::CollectProtocolFee {
 						pool_id,
@@ -1175,10 +1177,12 @@ impl<T: Config> Pallet<T> {
 				ensure!(*amount >= min_amounts[i], Error::<T>::AmountSlippage);
 				pool.balances[i] =
 					pool.balances[i].checked_sub(*amount).ok_or(Error::<T>::Arithmetic)?;
-				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *amount)?;
+				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *amount)
+					.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 			}
 
-			T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)?;
+			T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)
+				.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 			Self::deposit_event(Event::RemoveLiquidity {
 				pool_id,
 				who: who.clone(),

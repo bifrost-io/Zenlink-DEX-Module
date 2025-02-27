@@ -170,6 +170,8 @@ pub mod pallet {
 		AlreadyInWhiteList,
 		/// Account is no in the set who can create merkle distributor
 		NotInWhiteList,
+		/// Invalid MultiCurrency operation.
+		InvalidCurrencyOperation,
 	}
 
 	#[pallet::pallet]
@@ -298,7 +300,7 @@ pub mod pallet {
 				&merkle.distribute_holder,
 				&owner,
 				T::Balance::try_from(amount).unwrap_or_else(|_| Zero::zero()),
-			)?;
+			).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 			Self::set_claimed(merkle_distributor_id, index);
 
@@ -366,7 +368,7 @@ pub mod pallet {
 				&merkle.distribute_holder,
 				&recipient_account,
 				amount,
-			)?;
+			).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
 
 			Self::deposit_event(Event::<T>::Withdraw(
 				merkle_distributor_id,
