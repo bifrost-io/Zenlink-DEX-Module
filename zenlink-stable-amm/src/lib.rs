@@ -288,8 +288,6 @@ pub mod pallet {
 		InvalidBasePoolLpCurrency,
 		/// The token index out of range.
 		TokenIndexOutOfRange,
-		/// Invalid MultiCurrency operation.
-		InvalidCurrencyOperation,
 	}
 
 	#[pallet::call]
@@ -975,8 +973,9 @@ pub mod pallet {
 				);
 
 				ensure!(
-					future_a_time >=
-						now.checked_add(Number::from(MIN_RAMP_TIME))
+					future_a_time
+						>= now
+							.checked_add(Number::from(MIN_RAMP_TIME))
 							.ok_or(Error::<T>::Arithmetic)?,
 					Error::<T>::MinRampTime
 				);
@@ -994,14 +993,14 @@ pub mod pallet {
 
 				if future_a_precise < initial_a_precise {
 					ensure!(
-						future_a_precise.checked_mul(max_a_change).ok_or(Error::<T>::Arithmetic)? >=
-							initial_a_precise,
+						future_a_precise.checked_mul(max_a_change).ok_or(Error::<T>::Arithmetic)?
+							>= initial_a_precise,
 						Error::<T>::ExceedMaxAChange
 					);
 				} else {
 					ensure!(
-						future_a_precise <=
-							initial_a_precise
+						future_a_precise
+							<= initial_a_precise
 								.checked_mul(max_a_change)
 								.ok_or(Error::<T>::Arithmetic)?,
 						Error::<T>::ExceedMaxAChange
@@ -1091,7 +1090,7 @@ pub mod pallet {
 							&pool.account,
 							&pool.admin_fee_receiver,
 							balance,
-						).map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
+						)?;
 					}
 					Self::deposit_event(Event::CollectProtocolFee {
 						pool_id,
@@ -1116,10 +1115,12 @@ impl<T: Config> Pallet<T> {
 		Pools::<T>::try_mutate_exists(pool_id, |optioned_pool| -> Result<Balance, DispatchError> {
 			let pool = optioned_pool.as_mut().ok_or(Error::<T>::InvalidPoolId)?;
 			match pool {
-				Pool::Base(bp) =>
-					Self::base_pool_add_liquidity(who, pool_id, bp, amounts, min_mint_amount, to),
-				Pool::Meta(mp) =>
-					Self::meta_pool_add_liquidity(who, pool_id, mp, amounts, min_mint_amount, to),
+				Pool::Base(bp) => {
+					Self::base_pool_add_liquidity(who, pool_id, bp, amounts, min_mint_amount, to)
+				},
+				Pool::Meta(mp) => {
+					Self::meta_pool_add_liquidity(who, pool_id, mp, amounts, min_mint_amount, to)
+				},
 			}
 		})
 	}
@@ -1138,10 +1139,12 @@ impl<T: Config> Pallet<T> {
 		Pools::<T>::try_mutate_exists(pool_id, |optioned_pool| -> Result<Balance, DispatchError> {
 			let pool = optioned_pool.as_mut().ok_or(Error::<T>::InvalidPoolId)?;
 			match pool {
-				Pool::Base(bp) =>
-					Self::base_pool_swap(who, pool_id, bp, i, j, in_amount, out_min_amount, to),
-				Pool::Meta(mp) =>
-					Self::meta_pool_swap(who, pool_id, mp, i, j, in_amount, out_min_amount, to),
+				Pool::Base(bp) => {
+					Self::base_pool_swap(who, pool_id, bp, i, j, in_amount, out_min_amount, to)
+				},
+				Pool::Meta(mp) => {
+					Self::meta_pool_swap(who, pool_id, mp, i, j, in_amount, out_min_amount, to)
+				},
 			}
 		})
 	}
@@ -1177,12 +1180,10 @@ impl<T: Config> Pallet<T> {
 				ensure!(*amount >= min_amounts[i], Error::<T>::AmountSlippage);
 				pool.balances[i] =
 					pool.balances[i].checked_sub(*amount).ok_or(Error::<T>::Arithmetic)?;
-				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *amount)
-					.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
+				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *amount)?;
 			}
 
-			T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)
-				.map_err(|_| Error::<T>::InvalidCurrencyOperation)?;
+			T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)?;
 			Self::deposit_event(Event::RemoveLiquidity {
 				pool_id,
 				who: who.clone(),
@@ -1274,7 +1275,7 @@ impl<T: Config> Pallet<T> {
 		for amount in base_amounts.iter() {
 			if *amount > Zero::zero() {
 				deposit_base = true;
-				break
+				break;
 			}
 		}
 		let mut base_lp_received: Balance = Balance::default();
@@ -1298,8 +1299,8 @@ impl<T: Config> Pallet<T> {
 				base_lp_after
 					.checked_add(base_lp_received)
 					.and_then(|n| n.checked_sub(base_lp_prior))
-					.ok_or(Error::<T>::Arithmetic)? ==
-					Zero::zero(),
+					.ok_or(Error::<T>::Arithmetic)?
+					== Zero::zero(),
 				Error::<T>::AmountSlippage
 			)
 		}
@@ -1515,7 +1516,7 @@ impl<T: Config> Pallet<T> {
 			};
 			let currencies_len = pool.currency_ids.len();
 			if currency_index >= currencies_len {
-				return None
+				return None;
 			}
 
 			let balance =
