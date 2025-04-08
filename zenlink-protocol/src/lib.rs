@@ -1031,7 +1031,7 @@ pub mod pallet {
 
 					T::MultiAssetsHandler::transfer(*asset_id, &who, &Self::account_id(), *amount)?;
 					let new_charge_amount =
-						already_charge_amount.checked_add(*amount).ok_or(Error::<T>::Overflow)?;
+						already_charge_amount.checked_add(amount).ok_or(Error::<T>::Overflow)?;
 
 					rewards.insert(*asset_id, new_charge_amount);
 				}

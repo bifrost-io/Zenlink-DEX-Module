@@ -1,6 +1,7 @@
 // Copyright 2021-2022 Zenlink.
 // Licensed under Apache 2.0.
 
+use frame_support::traits::ExistenceRequirement;
 use super::*;
 
 impl<T: Config> Pallet<T> {
@@ -224,7 +225,7 @@ impl<T: Config> Pallet<T> {
 			.and_then(|n| n.checked_sub(admin_fee))
 			.ok_or(Error::<T>::Arithmetic)?;
 
-		T::MultiCurrency::transfer(pool.currency_ids[j], &pool.account, to, dy)
+		T::MultiCurrency::transfer(pool.currency_ids[j], &pool.account, to, dy, ExistenceRequirement::KeepAlive)
 			.map_err(|_| Error::<T>::InsufficientReserve)?;
 
 		Self::deposit_event(Event::CurrencyExchange {
@@ -276,8 +277,8 @@ impl<T: Config> Pallet<T> {
 			.and_then(|n| pool.balances[index as usize].checked_sub(n))
 			.ok_or(Error::<T>::Arithmetic)?;
 
-		T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount)?;
-		T::MultiCurrency::transfer(pool.currency_ids[index as usize], &pool.account, to, dy)?;
+		T::MultiCurrency::withdraw(pool.lp_currency_id, who, lp_amount, ExistenceRequirement::KeepAlive)?;
+		T::MultiCurrency::transfer(pool.currency_ids[index as usize], &pool.account, to, dy, ExistenceRequirement::KeepAlive)?;
 
 		Self::deposit_event(Event::RemoveLiquidityOneCurrency {
 			pool_id,
@@ -316,11 +317,11 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(burn_amount <= max_burn_amount, Error::<T>::AmountSlippage);
 
-		T::MultiCurrency::withdraw(pool.lp_currency_id, who, burn_amount)?;
+		T::MultiCurrency::withdraw(pool.lp_currency_id, who, burn_amount, ExistenceRequirement::KeepAlive)?;
 
 		for (i, balance) in amounts.iter().enumerate() {
 			if *balance > Zero::zero() {
-				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *balance)?;
+				T::MultiCurrency::transfer(pool.currency_ids[i], &pool.account, to, *balance, ExistenceRequirement::KeepAlive)?;
 			}
 		}
 

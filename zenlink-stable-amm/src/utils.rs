@@ -1,6 +1,7 @@
 // Copyright 2021-2022 Zenlink.
 // Licensed under Apache 2.0.
 
+use frame_support::traits::ExistenceRequirement;
 use super::*;
 
 impl<T: Config> Pallet<T> {
@@ -174,7 +175,7 @@ impl<T: Config> Pallet<T> {
 		amount: Balance,
 	) -> Result<Balance, Error<T>> {
 		let to_prior_balance = T::MultiCurrency::free_balance(currency_id, to);
-		T::MultiCurrency::transfer(currency_id, from, to, amount)
+		T::MultiCurrency::transfer(currency_id, from, to, amount, ExistenceRequirement::KeepAlive)
 			.map_err(|_| Error::<T>::InsufficientReserve)?;
 		let to_new_balance = T::MultiCurrency::free_balance(currency_id, to);
 

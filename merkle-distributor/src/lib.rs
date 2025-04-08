@@ -53,6 +53,7 @@ pub struct MerkleMetadata<Balance, CurrencyId, AccountId, BoundString> {
 
 #[frame_support::pallet]
 pub mod pallet {
+	use frame_support::traits::ExistenceRequirement;
 	use super::*;
 
 	#[pallet::config]
@@ -298,6 +299,7 @@ pub mod pallet {
 				&merkle.distribute_holder,
 				&owner,
 				T::Balance::try_from(amount).unwrap_or_else(|_| Zero::zero()),
+				ExistenceRequirement::KeepAlive,
 			)?;
 
 			Self::set_claimed(merkle_distributor_id, index);
@@ -329,6 +331,7 @@ pub mod pallet {
 							&who,
 							&meta.distribute_holder,
 							meta.distribute_amount,
+							ExistenceRequirement::KeepAlive,
 						)
 						.map_err(|_| Error::<T>::BadChargeAccount)?;
 
@@ -366,6 +369,7 @@ pub mod pallet {
 				&merkle.distribute_holder,
 				&recipient_account,
 				amount,
+				ExistenceRequirement::KeepAlive,
 			)?;
 
 			Self::deposit_event(Event::<T>::Withdraw(
