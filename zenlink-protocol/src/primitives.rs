@@ -20,6 +20,7 @@ pub const RESERVED: u8 = 3;
 #[derive(
 	Encode,
 	Decode,
+	DecodeWithMemTracking,
 	Eq,
 	PartialEq,
 	Copy,
