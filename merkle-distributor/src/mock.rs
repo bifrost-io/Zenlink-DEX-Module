@@ -130,7 +130,6 @@ impl pallet_balances::Config for Runtime {
 }
 
 impl Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
 	type MerkleDistributorId = u32;

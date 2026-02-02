@@ -168,7 +168,6 @@ impl pallet_timestamp::Config for Test {
 }
 
 impl zenlink_stable_amm::Config for Test {
-	type RuntimeEvent = RuntimeEvent;
 	type CurrencyId = CurrencyId;
 	type MultiCurrency = Tokens;
 	type PoolId = PoolId;
@@ -181,7 +180,6 @@ impl zenlink_stable_amm::Config for Test {
 }
 
 impl zenlink_protocol::Config for Test {
-	type RuntimeEvent = RuntimeEvent;
 	type MultiAssetsHandler = ZenlinkMultiAssets<Zenlink, Balances, LocalAssetAdaptor<Tokens>>;
 	type PalletId = ZenlinkPalletId;
 	type AssetId = AssetId;
@@ -192,7 +190,6 @@ impl zenlink_protocol::Config for Test {
 }
 
 impl Config for Test {
-	type RuntimeEvent = RuntimeEvent;
 	type StablePoolId = PoolId;
 	type Balance = Balance;
 	type StableCurrencyId = CurrencyId;

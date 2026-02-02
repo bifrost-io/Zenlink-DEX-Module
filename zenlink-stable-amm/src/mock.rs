@@ -163,8 +163,6 @@ impl pallet_timestamp::Config for Test {
 }
 
 impl Config for Test {
-	type RuntimeEvent = RuntimeEvent;
-	type CurrencyId = CurrencyId;
 	type MultiCurrency = Tokens;
 	type PoolId = PoolId;
 	type EnsurePoolAsset = EnsurePoolAssetImpl<Tokens>;
