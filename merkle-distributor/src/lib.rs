@@ -36,7 +36,7 @@ pub use default_weights::WeightInfo;
 #[allow(type_alias_bounds)]
 type AccountIdOf<T: Config> = <T as frame_system::Config>::AccountId;
 
-#[derive(Encode, Decode, Clone, PartialEq, Eq, Default, MaxEncodedLen, RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, Default, MaxEncodedLen, Debug, TypeInfo)]
 pub struct MerkleMetadata<Balance, CurrencyId, AccountId, BoundString> {
 	/// The merkle tree root
 	pub merkle_root: H256,

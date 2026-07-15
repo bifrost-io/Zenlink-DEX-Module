@@ -25,7 +25,7 @@ pub const RESERVED: u8 = 3;
 	PartialEq,
 	Copy,
 	Clone,
-	RuntimeDebug,
+	Debug,
 	PartialOrd,
 	Ord,
 	TypeInfo,
@@ -88,7 +88,7 @@ impl Into<MultiLocation> for AssetId {
 }
 
 /// Status for TradingPair
-#[derive(Clone, Copy, Encode, Decode, RuntimeDebug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
+#[derive(Clone, Copy, Encode, Decode, Debug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
 pub enum PairStatus<Balance, BlockNumber, Account> {
 	/// Pair is Trading,
 	/// can add/remove liquidity and swap.
@@ -107,7 +107,7 @@ impl<Balance, BlockNumber, Account> Default for PairStatus<Balance, BlockNumber,
 }
 
 /// Parameters of pair in Bootstrap status
-#[derive(Encode, Decode, Clone, Copy, RuntimeDebug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
+#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
 pub struct BootstrapParameter<Balance, BlockNumber, Account> {
 	/// target supply that trading pair could to normal.
 	pub target_supply: (Balance, Balance),
@@ -121,7 +121,7 @@ pub struct BootstrapParameter<Balance, BlockNumber, Account> {
 	pub pair_account: Account,
 }
 
-#[derive(Encode, Decode, Clone, Copy, RuntimeDebug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
+#[derive(Encode, Decode, Clone, Copy, Debug, PartialEq, Eq, MaxEncodedLen, TypeInfo)]
 pub struct PairMetadata<Balance, Account> {
 	pub pair_account: Account,
 	pub total_supply: Balance,
